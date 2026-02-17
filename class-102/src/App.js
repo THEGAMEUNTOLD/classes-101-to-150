@@ -1,13 +1,22 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
 
+const PostRouter = require("./Routes/Post.routes");
 const AuthRoutes = require("./Routes/Auth.routes");
 
-const App = express();
+const app = express();
 
-App.use(express.json());
-App.use(cookieParser());
+// Middlewares
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
-App.use('/api/Auth', AuthRoutes);
+// Routes
+app.use("/posts", PostRouter);
+app.use("/api/auth", AuthRoutes);
 
-module.exports = App;
+app.get("/", (req, res) => {
+  res.send("API Running");
+});
+
+module.exports = app;

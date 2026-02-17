@@ -1,6 +1,6 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const User = require("../models/User.model");
+const User = require("../Models/User.model");
 
 // ================= TOKEN HELPER =================
 const createToken = (userId) => {

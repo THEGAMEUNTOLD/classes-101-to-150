@@ -3,7 +3,6 @@ const imagekit = require("../config/Imagekit");
 const getUserFromToken = require("../middleware/Auth");
 const { toFile } = require("@imagekit/nodejs");
 
-
 // ===== CREATE POST =====
 const CreatePostController = async (req, res) => {
   try {

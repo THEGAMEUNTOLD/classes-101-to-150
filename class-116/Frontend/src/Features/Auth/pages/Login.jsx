@@ -1,16 +1,16 @@
 import React, { useState } from 'react'
 import '../Style/Login.scss'
 import FormGroup from '../Components/FormGroup';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../Hooks/useAuth'
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
     const { loading, handleLogin, } = useAuth()
     const navigate = useNavigate()
 
-    const { email, setemail } = useState('')
-    const { password, setPassword } = useState('')
+    const [email, setEmail] = useState('')
+    const [password, setPassword] = useState('')
 
     async function handleSubmit(e) {
         e.preventDefault()
@@ -25,7 +25,7 @@ const Login = () => {
                 <form onSubmit={handleSubmit}>
                     <FormGroup
                         value={email}
-                        onChange={(e) => setemail(e.target.value)}
+                        onChange={(e) => setEmail(e.target.value)}
                         label="Email"
                         placeholder="Enter your email" />
                     <FormGroup

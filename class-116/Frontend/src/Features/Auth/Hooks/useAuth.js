@@ -1,5 +1,6 @@
 import { login, register, logout, getMe } from '../Services/Auth.api'
-import { useContext ,  } from 'react'
+import { useContext, useState, useEffect } from 'react'
+
 import { AuthContext } from '../Context/Auth.context'
 
 export const useAuth = () => {
@@ -26,7 +27,7 @@ export const useAuth = () => {
         }
         catch (error) {
             console.error('Login error:', error)
-        }   
+        }
         finally {
             setLoading(false)
         }
@@ -57,10 +58,13 @@ export const useAuth = () => {
     }
 
     useEffect(() => {
+    const token = document.cookie.includes("token")
+    if (token) {
         handleGetMe()
-    }, [])
+    }
+}, [])  
 
-    
+
 
     return { user, loading, handleRegister, handleLogin, handleGetMe, handleLogout }
 }

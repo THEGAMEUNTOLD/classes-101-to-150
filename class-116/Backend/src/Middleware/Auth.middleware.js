@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const Blacklist = require("../Models/Blacklist.model");
+const { getCache } = require("../Config/Cache");
 
 /* =========================
    PROTECT MIDDLEWARE
@@ -22,6 +22,10 @@ exports.protect = async (req, res, next) => {
       token = req.headers.authorization.split(" ")[1];
     }
 
+    if (!token && req.cookies.token) {
+      token = req.cookies.token;
+    }
+
     /* =========================
        If token not provided → Unauthorized
     ========================= */
@@ -36,7 +40,7 @@ exports.protect = async (req, res, next) => {
        Check if token is blacklisted
        Prevents access after logout
     ========================= */
-    const isBlacklisted = await Blacklist.isBlacklisted(token);
+    const isBlacklisted = await getCache(`blacklist:${token}`);
     if (isBlacklisted) {
       return res.status(401).json({
         success: false,

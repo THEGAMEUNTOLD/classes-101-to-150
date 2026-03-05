@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
 import "../Style/Register.scss"
 import FormGroup from '../Components/FormGroup'
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import {useAuth} from '../Hooks/useAuth'
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 
 
 const Register = () => {

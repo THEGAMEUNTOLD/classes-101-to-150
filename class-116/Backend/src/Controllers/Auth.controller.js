@@ -24,7 +24,7 @@ const generateToken = (userId) => {
  */
 exports.register = async (req, res, next) => {
   try {
-    const { name, email, password } = req.body;
+    const { username, email, password } = req.body;
 
     const existingUser = await User.findByEmail(email);
     if (existingUser) {
@@ -34,13 +34,19 @@ exports.register = async (req, res, next) => {
       });
     }
 
-    const user = await User.create({ name, email, password });
+    const user = await User.create({ name: username, email, password });
     const token = generateToken(user._id);
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000
+    });
 
     res.status(201).json({
       success: true,
       message: "User registered successfully",
-      token,
       user: {
         id: user._id,
         name: user.name,
@@ -86,10 +92,16 @@ exports.login = async (req, res, next) => {
 
     const token = generateToken(user._id);
 
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000
+    });
+
     res.json({
       success: true,
       message: "Login successful",
-      token,
       user: {
         id: user._id,
         name: user.name,
@@ -143,6 +155,8 @@ exports.logout = async (req, res, next) => {
      * Key format: blacklist:<token>
      */
     await setCache(`blacklist:${token}`, "true", expiresInSeconds);
+
+    res.clearCookie("token");
 
     res.json({
       success: true,

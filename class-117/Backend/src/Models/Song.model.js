@@ -6,22 +6,24 @@ const songSchema = new mongoose.Schema({
         required: true,
     },
     posterUrl: {
-        type: String,
-        required: false,
+        type: String
     },
     title: {
         type: String,
         required: true,
     },
+
+    artist: String,
+    album: String,
+    year: String,
+    genre: String,
+
     mood: {
-        type: String,
-        enum: {
-            values: ["sad", "happy", "surprised"],
-            message: "Enum this is "
-        },
-        required: true,
+    type: String,
+    enum: ["sad", "happy", "surprised"],
+    required: true
     }
-})
+});
 
 const songModel = mongoose.model("songs", songSchema)
 

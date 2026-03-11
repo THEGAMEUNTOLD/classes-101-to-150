@@ -161,3 +161,12 @@ npm install express-validator
 create files -> 
 C:\Users\LENOVO\OneDrive\Desktop\my work\classes-101-to-150\class-120\src\Middlewares\ValidateRequest.js
 C:\Users\LENOVO\OneDrive\Desktop\my work\classes-101-to-150\class-120\src\Validators\Auth.Validaators.js
+
+
+server types
+
+1. WEB server
+2. SMTP server
+
+WEB-server-->--transporter ->--SMTP-server-->---Email-Address
+ 

@@ -152,3 +152,6 @@ User
 6. **Generate token** → JWT token or verification code.
 7. **Send token** → JSON response or email link.
 8. **User receives token** → can use to verify email or login.
+
+
+npm install express-validator

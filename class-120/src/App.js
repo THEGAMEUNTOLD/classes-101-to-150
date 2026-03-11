@@ -11,4 +11,5 @@ app.get("/", (req, res) => {
   res.send("Server is running!");
 });
 
+app.use("/api/auth",AuthRoutes)
 export default app;

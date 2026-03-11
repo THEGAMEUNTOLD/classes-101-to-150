@@ -153,5 +153,11 @@ User
 7. **Send token** → JSON response or email link.
 8. **User receives token** → can use to verify email or login.
 
+create flie
+C:\Users\LENOVO\OneDrive\Desktop\my work\classes-101-to-150\class-120\src\Controllers\Auth.Controller.js
+
 
 npm install express-validator
+create files -> 
+C:\Users\LENOVO\OneDrive\Desktop\my work\classes-101-to-150\class-120\src\Middlewares\ValidateRequest.js
+C:\Users\LENOVO\OneDrive\Desktop\my work\classes-101-to-150\class-120\src\Validators\Auth.Validaators.js

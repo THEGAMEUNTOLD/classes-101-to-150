@@ -1,4 +1,48 @@
+#  Project Index
+
+- [Project Overview](#project-perplexity-clone)
+
+- [Project Features](#project-features)
+
+- [Data Modeling](#data-modeling)
+  - [User Model](#user)
+  - [Chat Model](#chat)
+  - [Message Model](#message)
+
+- [Project Setup](#setup-basic-terminal-command)
+  - [npm init](#1-npm-init--y)
+  - [Install Dependencies](#2-npm-i-express-mongoose-jsonwebtoken-dotenv-cookie-parser-bcryptjs)
+  - [Install Validators](#npm-install-express-validator)
+
+- [User Registration Flow](#-user-registration-flow-diagram)
+
+- [Server Types](#server-types)
+  - [Web Server](#1-web-server)
+  - [SMTP Server](#2-smtp-server)
+
+- [Email Sending System](#-email-sending-flow-diagram)
+
+- [Project Folder Structure](#-folder-structure-diagram)
+
+- [System Architecture Flow](#-system-flow-diagram)
+
+- [File Explanations](#-file-by-file-explanation)
+  - [Server.js](#1-serverjs-application-entry-point)
+  - [App.js](#2-appjs-express-application-setup)
+  - [Database.js](#3-databasejs-mongodb-connection)
+  - [Auth Routes](#4-authroutesjs-api-routes)
+  - [Validators](#5-authvalidatorsjs-input-validation)
+  - [Middleware](#6-validaterequestjs-middleware)
+  - [Controller](#7-authcontrollerjs-business-logic)
+  - [User Model](#8-usermodeljs-database-schema)
+  - [Mail Service](#9-mailservicejs-email-system)
+
+- [How Everything Connects](#-how-all-files-connect)
+
+- [Final System Result](#-final-result)
+
 # Project perplexity Clone
+
 ## **Project Features**
 
 1. **Authentication System**

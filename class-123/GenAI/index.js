@@ -3,6 +3,7 @@ import readline from "readline/promises";
 import { stdin as input, stdout as output } from "process";
 import { ChatMistralAI } from "@langchain/mistralai";
 import { sendMail } from "./Mail.Service.js";
+import { searchWeb } from "./Search.Service.js";
 
 const rl = readline.createInterface({ input, output });
 
@@ -13,11 +14,9 @@ const model = new ChatMistralAI({
 
 console.log("Type 'exit' to quit.\n");
 
-// 🔹 Parse email command from USER input
+// 🔹 Parse email command
 function parseEmailCommand(text) {
-  const regex =
-    /send an email to ([\w.@-]+) with subject (.+?) and body (.+)/i;
-
+  const regex = /send an email to ([\w.@-]+) with subject (.+?) and body (.+)/i;
   const match = text.match(regex);
 
   if (!match) return null;
@@ -29,41 +28,65 @@ function parseEmailCommand(text) {
   };
 }
 
+// 🔹 Parse search command
+function parseSearchCommand(text) {
+  const regex = /search (.+)/i;
+  const match = text.match(regex);
+
+  if (!match) return null;
+
+  return match[1];
+}
+
 while (true) {
+
   const userInput = await rl.question("You: ");
 
   if (userInput.toLowerCase() === "exit") break;
 
   try {
-    // AI response generate
-    const response = await model.generate([
-      [
-        {
-          role: "user",
-          content: userInput
-        }
-      ]
-    ]);
 
-    const aiText = response.generations[0][0].text;
+    // 🔹 1️ Check if user wants to search
+    const searchQuery = parseSearchCommand(userInput);
 
-    console.log("MistralAI:", aiText);
+    if (searchQuery) {
 
-    // ✅ IMPORTANT: parse USER INPUT not AI response
+      const results = await searchWeb(searchQuery);
+
+      console.log("\n Search Results:\n");
+
+      results.forEach((r, i) => {
+        console.log(`${i + 1}. ${r.title}`);
+        console.log(r.url);
+        console.log(r.content);
+        console.log("-----------------------");
+      });
+
+      continue;
+    }
+
+    // 🔹 2️ Check if user wants to send email
     const emailData = parseEmailCommand(userInput);
 
     if (emailData) {
-      try {
-        const result = await sendMail(emailData);
-        console.log("📧 Email Result:", result);
-      } catch (err) {
-        console.error("❌ Email Error:", err.message);
-      }
+
+      const result = await sendMail(emailData);
+      console.log(" Email Result:", result);
+
+      continue;
     }
 
+    // 🔹 3️ Otherwise normal AI chat
+    const response = await model.invoke(userInput);
+
+    console.log("MistralAI:", response.content);
+
   } catch (err) {
-    console.error("❌ Error:", err.message);
+
+    console.error(" Error:", err.message);
+
   }
+
 }
 
 rl.close();

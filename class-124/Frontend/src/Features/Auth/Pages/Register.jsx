@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { register } from "../Services/Auth.Api";
+import { useAuth } from "../../../App/Hooks/useAuth";
+
 
 export default function Register() {
+  const { handleRegister } = useAuth();
 
   const [formData, setFormData] = useState({
     username: "",
@@ -18,20 +20,18 @@ export default function Register() {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  try {
-    const data = await register(
-      formData.email,
-      formData.username,
-      formData.password
-    );
-
-    console.log(data);
-  } catch (error) {
-    console.error(error);
-  }
-};
+    try {
+      await handleRegister(
+        formData.email,
+        formData.username,
+        formData.password
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -40,7 +40,7 @@ export default function Register() {
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
 
         {/* Mac style dots */}
-        
+
 
         {/* Title */}
         <h2 className="text-2xl font-semibold text-gray-800 text-center">
@@ -108,7 +108,7 @@ export default function Register() {
 
         {/* Footer */}
         <p className="text-sm text-gray-500 text-center mt-6">
-          Already have an account? 
+          Already have an account?
           <Link to="/login" className="text-black font-medium cursor-pointer ml-1">
             Log in
           </Link>

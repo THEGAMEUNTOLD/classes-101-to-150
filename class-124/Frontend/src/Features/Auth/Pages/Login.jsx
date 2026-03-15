@@ -1,37 +1,19 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function Login() {
+  const [email,setEmail] = useState('');
+  const [password,setPassword] = useState('');
 
-  const [form, setForm] = useState({
-    email: "",
-    password: ""
-  });
-
-  const handleChange = (e) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value
-    });
-  };
+  const { handleLogin } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(form)
-      });
-
-      const data = await res.json();
-      console.log(data);
-
-    } catch (err) {
-      console.error(err);
+    const payload = {
+      email,
+      password,
     }
   };
 

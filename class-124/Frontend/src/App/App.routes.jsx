@@ -10,5 +10,10 @@ export const router = createBrowserRouter([
   {
     path: "/register",
     element: <Register />
+  },
+  {
+    path: "/",
+    element: <h1 className="text-3xl font-bold text-center mt-20">Welcome to the App</h1>
   }
+
 ]);

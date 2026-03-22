@@ -77,7 +77,7 @@
 7. **express-validator** – Middleware for validating and sanitizing user input.
 8. **nodemailer** – Module for sending emails via SMTP.
 
- 
+
 
 # User verification by email 
 ```

@@ -13,7 +13,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.get('/', (req, res) => {
-  res.json({ message: 'Server is running on port ' + PORT });
+  res.json({ message: 'Server is running on port '});
 });
 
 app.use("/api/auth", authRouter)

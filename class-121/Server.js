@@ -4,10 +4,12 @@ import "dotenv/config";
 // Import application instance and database connector
 import app from "./src/App.js";
 import connectDB from "./src/Config/Database.js";
+import { testAI } from "./src/Services/Ai.service.js";
 
 // Define server port with fallback default
 const PORT = process.env.PORT || 3000;
 
+testAI();
 /**
  * Initialize database connection before starting server
  * Ensures app runs only when DB is connected

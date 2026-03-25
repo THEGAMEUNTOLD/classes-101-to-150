@@ -49,27 +49,23 @@ const userSchema = new mongoose.Schema(
   },
   {
     timestamps: true, // Adds createdAt and updatedAt
-  }
+  },
 );
 
 /**
  * Hash password before saving user
  * Ensures password is encrypted securely
  */
-userSchema.pre("save", async function (next) {
+userSchema.pre("save", async function () {
   try {
     // Skip hashing if password unchanged
-    if (!this.isModified("password")) return next();
+    if (!this.isModified("password")) return;
 
     const SALT_ROUNDS = 10;
 
     // Hash password using bcrypt
     this.password = await bcrypt.hash(this.password, SALT_ROUNDS);
-
-    next();
-  } catch (error) {
-    next(error);
-  }
+  } catch (error) {}
 });
 
 /**
@@ -86,9 +82,6 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
   }
 };
 
-/**
- * Create and export User model
- */
 const UserModel = mongoose.model("User", userSchema);
 
 export default UserModel;

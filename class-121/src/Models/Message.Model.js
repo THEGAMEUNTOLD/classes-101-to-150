@@ -33,10 +33,7 @@ const messageSchema = new mongoose.Schema(
   }
 );
 
-/**
- * Create and export Message model
- * Used for database operations on messages
- */
+
 const MessageModel = mongoose.model("Message", messageSchema);
 
 export default MessageModel;

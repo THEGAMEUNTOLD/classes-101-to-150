@@ -38,11 +38,11 @@ const chatSchema = new mongoose.Schema(
  * Add pre-save validation for safety
  * Ensures required fields integrity
  */
-chatSchema.pre("save", function (next) {
+chatSchema.pre("save", function () {
   try {
     // Validate user existence
     if (!this.user) {
-      return next(new Error("User reference is required"));
+      return (new Error("User reference is required"));  
     }
 
     // Normalize title fallback
@@ -50,9 +50,9 @@ chatSchema.pre("save", function (next) {
       this.title = "New Chat";
     }
 
-    next();
+
   } catch (error) {
-    next(error);
+  
   }
 });
 

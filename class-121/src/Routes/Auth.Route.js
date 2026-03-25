@@ -10,36 +10,49 @@ import {
   registerValidator,
   loginValidator,
 } from "../Validators/Auth.Validator.js";
-import { protect } from "../Middleware/Auth.Middleware.js";
+import { authUser } from "../Middleware/Auth.Middleware.js";
+
 
 const authRouter = Router();
 
-// PUBLIC ROUTES
 /**
- * Register user
+ * @route POST /api/auth/register
+ * @desc  l Register a new user
+ * @access Public
+ * @body {username, email, password}
  */
 authRouter.post("/register", registerValidator, register);
 
 /**
- * Login user
+ * @route POST /api/auth/login
+ * @desc  login user and enter JWT Token
+ * @access Public
+ * @body {email, password}
  */
 authRouter.post("/login", loginValidator, login);
 
 /**
- * Verify email
+ * @route GET /api/auth/verify-email
+ * @desc  Verify user's email address
+ * @access Public
+ * @query {token}
  */
 authRouter.get("/verify-email", verifyEmail);
 
-// PRIVATE ROUTES (Protected)
+/**
+ * @route POST /api/auth/logout
+ * @desc  User logged out
+ * @access Public
+ * @body {email, password}
+ */
+authRouter.post("/logout", authUser , logout);
 
 /**
- * Logout user (requires authentication)
+ * @route POST/api/auth/login
+ * @desc  login user and enter JWT Token
+ * @access Public
+ * @body {email, password}
  */
-authRouter.post("/logout", protect, logout);
-
-/**
- * Get current logged-in user
- */
-authRouter.get("/me", protect, getMe);
+authRouter.get("/me", authUser, getMe);
 
 export default authRouter;

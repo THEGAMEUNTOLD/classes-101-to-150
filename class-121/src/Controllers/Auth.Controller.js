@@ -27,8 +27,7 @@ export async function register(req, res) {
     const user = await UserModel.create({ username, email, password });
 
     // Generate secure email verification token
-    const { rawToken, hashedToken, expiresAt } =
-      createVerificationToken();
+    const { rawToken, hashedToken, expiresAt } = createVerificationToken();
 
     // Assign verification token to user
     user.verificationToken = hashedToken;
@@ -170,12 +169,22 @@ export function logout(req, res) {
  */
 export async function getMe(req, res) {
   try {
-    // Fetch user excluding sensitive fields
-    const user = await UserModel.findById(req.user._id).select("-password");
+    const userId = req.user.id;
 
-    return res.json({
+    const user = await UserModel.findById(userId).select("-password");
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+        success: "false",
+        err: "User not found",
+      });
+    }
+
+    res.status(200).json({
+      message: " User detail fetched successfully",
       success: true,
-      data: user,
+      user,
     });
   } catch (error) {
     console.error("GetMe Error:", error.message);

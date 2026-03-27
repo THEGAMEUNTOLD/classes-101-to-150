@@ -8,7 +8,7 @@ const Register = () => {
 
   const submitForm = (event) => {
     event.preventDefault();
-  
+
     const payload = {
       username,
       email,

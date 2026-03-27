@@ -1,33 +1,25 @@
-// Main Application Entry Point
-// Sets up Express server with middleware, routes, and environment configuration.
 import express from "express";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import authRouter from "./Routes/Auth.Route.js";
+import morgan from "morgan";
+import cors from "cors";
 
-// Load environment variables securely
 dotenv.config();
 
-// Initialize Express application
 const app = express();
-
-// Define server port (fallback to 3000 if not provided)
 const PORT = process.env.PORT || 3000;
 
-//   GLOBAL MIDDLEWARES
-
-// Parse incoming JSON requests
 app.use(express.json());
-
-// Parse URL-encoded data (form submissions)
 app.use(express.urlencoded({ extended: true }));
-
-// Parse cookies from incoming requests
 app.use(cookieParser());
+app.use(morgan("dev"));
+app.use(cors({
+  origin:"http://localhost:5173",
+  credentials:true,
+  methods:["GET","POST","PUT","DELETE"],
+}))
 
-// HEALTH CHECK ROUTE
-
-// Purpose: Verify server is running
 app.get("/", (req, res) => {
   try {
     res.status(200).json({
@@ -42,12 +34,10 @@ app.get("/", (req, res) => {
   }
 });
 
-// API ROUTES
 
-// Auth routes for user authentication
 app.use("/api/auth", authRouter);
 
-// GLOBAL ERROR HANDLER (Fallback)
+
 app.use((err, req, res, next) => {
   console.error("Global Error:", err);
 
@@ -57,5 +47,4 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Export app for server startup (separation of concerns)
 export default app;

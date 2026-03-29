@@ -1,37 +1,53 @@
-import React, { useState } from 'react'
-import { Link } from 'react-router'
+import React, { useState } from "react";
+import { register } from "../Services/Auth.Api";
+import { Link } from "react-router";
 
 const Register = () => {
-  const [username, setUsername] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  const submitForm = (event) => {
-    event.preventDefault()
+  const submitForm = async (event) => {
+    event.preventDefault();
 
     const payload = {
       username,
       email,
       password,
-    }
+    };
 
-    console.log('Register payload:', payload)
-  }
+    try {
+      console.log("Register payload:", payload);
+
+      const res = await register(payload);
+
+      console.log("REGISTER RESPONSE:", res);
+
+      // ✅ After successful register
+      // If you added auto-login → cookie is set here
+
+      // OPTIONAL: call getMe
+      // await getMe();
+    } catch (error) {
+      console.error("REGISTER ERROR:", error.response?.data || error.message);
+    }
+  };
 
   return (
     <section className="min-h-screen bg-zinc-950 px-4 py-10 text-zinc-100 sm:px-6 lg:px-8">
       <div className="mx-auto flex min-h-[85vh] w-full max-w-5xl items-center justify-center">
         <div className="w-full max-w-md rounded-2xl border border-[#31b8c6]/40 bg-zinc-900/70 p-8 shadow-2xl shadow-black/50 backdrop-blur">
-          <h1 className="text-3xl font-bold text-[#31b8c6]">
-            Create Account
-          </h1>
+          <h1 className="text-3xl font-bold text-[#31b8c6]">Create Account</h1>
           <p className="mt-2 text-sm text-zinc-300">
             Register with your username, email, and password.
           </p>
 
           <form onSubmit={submitForm} className="mt-8 space-y-5">
             <div>
-              <label htmlFor="username" className="mb-2 block text-sm font-medium text-zinc-200">
+              <label
+                htmlFor="username"
+                className="mb-2 block text-sm font-medium text-zinc-200"
+              >
                 Username
               </label>
               <input
@@ -46,7 +62,10 @@ const Register = () => {
             </div>
 
             <div>
-              <label htmlFor="email" className="mb-2 block text-sm font-medium text-zinc-200">
+              <label
+                htmlFor="email"
+                className="mb-2 block text-sm font-medium text-zinc-200"
+              >
                 Email
               </label>
               <input
@@ -61,7 +80,10 @@ const Register = () => {
             </div>
 
             <div>
-              <label htmlFor="password" className="mb-2 block text-sm font-medium text-zinc-200">
+              <label
+                htmlFor="password"
+                className="mb-2 block text-sm font-medium text-zinc-200"
+              >
                 Password
               </label>
               <input
@@ -84,15 +106,18 @@ const Register = () => {
           </form>
 
           <p className="mt-6 text-center text-sm text-zinc-300">
-            Already have an account?{' '}
-            <Link to="/login" className="font-semibold text-[#31b8c6] transition hover:text-[#45c7d4]">
+            Already have an account?{" "}
+            <Link
+              to="/login"
+              className="font-semibold text-[#31b8c6] transition hover:text-[#45c7d4]"
+            >
               Login
             </Link>
           </p>
         </div>
       </div>
     </section>
-  )
-}
+  );
+};
 
-export default Register
+export default Register;

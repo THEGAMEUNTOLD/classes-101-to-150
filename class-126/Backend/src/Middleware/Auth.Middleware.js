@@ -1,32 +1,31 @@
 import jwt from "jsonwebtoken";
-import UserModel from "../Models/User.Model.js";
 
-/**
- * Protect middleware
- * Verifies JWT token and attaches authenticated user to request
- */
-export async function authUser(req, res, next) {
-  const token = req.cookies.token;
 
-  if (!token) {
-    return res.status(401).json({
-      success: false,
-      message: "Not authorized, token missing",
-      err: "Not token provided",
-    });
-  }
+export function authUser(req, res, next) {
 
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const token = req.cookies.token;
 
-    req.user = decoded;
+    if (!token) {
+        return res.status(401).json({
+            message: "Unauthorized",
+            success: false,
+            err: "No token provided"
+        })
+    }
 
-    next();
-  } catch (err) {
-    return res.status(401).json({
-      message: "Unauthorized",
-      success: false,
-      err: " Invalid token",
-    });
-  }
+    try {
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        req.user = decoded;
+
+        next();
+
+    } catch (err) {
+        return res.status(401).json({
+            message: "Unauthorized",
+            success: false,
+            err: "Invalid token"
+        })
+    }
 }

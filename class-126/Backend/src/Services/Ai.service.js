@@ -15,23 +15,16 @@ const mistralModel = new ChatMistralAI({
 
 export async function generateResponse(messages) {
 
-    const formattedMessages = messages
-        .map(msg => {
-            if (!msg || !msg.role) return null; // safety
-
-            if (msg.role === "user") {
-                return new HumanMessage(msg.content);
-            } else if (msg.role === "ai") {
-                return new AIMessage(msg.content);
-            }
-
-            return null;
-        })
-        .filter(Boolean); // removes null/undefined
-
-    const response = await geminiModel.invoke(formattedMessages);
+    const response = await geminiModel.invoke(messages.map(msg => {
+        if (msg.role == "user") {
+            return new HumanMessage(msg.content)
+        } else if (msg.role == "ai") {
+            return new AIMessage(msg.content)
+        }
+    }));
 
     return response.text;
+
 }
 
 export async function generateChatTitle(message) {

@@ -3,7 +3,6 @@ import { router } from "./App.Routes"
 import { useAuth } from "../Features/Auth/Hooks/UseAuth"
 import { useEffect } from "react"
 
-
 function App() {
 
   const auth = useAuth()

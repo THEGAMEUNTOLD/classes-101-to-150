@@ -29,10 +29,7 @@ export const validateRegisterUser = [
         .withMessage("Contact information is required")
         .matches(/^\d{10}$/)
         .withMessage("Contact must be a valid 10-digit number"),
-    body("role")
-        .not()
-        .isEmpty()
-        .withMessage("Role is required"),
+
     body("isSeller")
         .isBoolean()
         .withMessage("isSeller must be a boolean value"),

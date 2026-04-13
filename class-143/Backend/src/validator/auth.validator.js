@@ -33,6 +33,9 @@ export const validateRegisterUser = [
         .not()
         .isEmpty()
         .withMessage("Role is required"),
+    body("isSeller")
+        .isBoolean()
+        .withMessage("isSeller must be a boolean value"),
 
     validateRequest
 

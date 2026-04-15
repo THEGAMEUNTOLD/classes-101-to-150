@@ -1,6 +1,6 @@
 import express from "express";
 import { AuthenticateSeller } from "../middleware/auth.middleware.js";
-import { createProduct } from "../controllers/product.controller.js";
+import { createProduct, getSellerProducts } from "../controllers/product.controller.js";
 import { validateProductCreation } from "../validator/product.validator.js";
 import muiter from "multer";
 
@@ -11,6 +11,21 @@ const upload = muiter({
 
 const router = express.Router();
 
-router.post("/", AuthenticateSeller, validateProductCreation, upload.array("images", 7), createProduct);
+/**
+ * @route POST /products
+ * @desc Create a new product
+ * @access Private (Seller only)
+ * @body { title, description, priceAmount, priceCurrency, images } 
+ */
+router.post("/", AuthenticateSeller, upload.array("images", 7), validateProductCreation, createProduct);
+
+/**
+ * @route GET /products/seller
+ * @desc Get all products for the authenticated seller
+ * @access Private (Seller only)
+ */
+
+router.get("/seller", AuthenticateSeller, getSellerProducts);
+
 
 export default router;

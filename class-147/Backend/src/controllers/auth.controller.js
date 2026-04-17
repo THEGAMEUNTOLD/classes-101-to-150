@@ -126,6 +126,30 @@ export const googleCallback = async (req, res) => {
 
     res.cookie("token", token)
 
-res.redirect("http://localhost:5173")
+    res.redirect("http://localhost:5173")
 
 }
+
+
+export const getCurrentUser = async (req, res) => {
+    try {
+        const user = req.user;
+
+        res.status(200).json({
+            message: "User details fetched successfully",
+            success: true,
+            user: {
+                id: user._id,
+                email: user.email,
+                fullname: user.fullname,
+                contact: user.contact,
+                role: user.role
+            }
+        });
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Server error" });
+    }
+}
+

@@ -55,3 +55,15 @@ export const getSellerProducts = async (req, res) => {
         products
     })
 }
+
+export const getAllProducts = async (req, res) => {
+    const products = await ProductModel.find()
+
+    return res.status(200).json({
+        message: "Products retrieved successfully",
+        success: true,
+        products
+    })
+
+}
+

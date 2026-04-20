@@ -1,11 +1,11 @@
 import express from "express";
 import { AuthenticateSeller } from "../middleware/auth.middleware.js";
-import { createProduct, getAllProducts, getSellerProducts, getProductDetails } from "../controllers/product.controller.js";
+import { createProduct, getAllProducts, getSellerProducts, getProductDetails,createProductVariant } from "../controllers/product.controller.js";
 import { validateProductCreation } from "../validator/product.validator.js";
-import muiter from "multer";
+import multer from "multer";
 
-const upload = muiter({
-    storage: muiter.memoryStorage(),
+const upload = multer({
+    storage: multer.memoryStorage(),
     limits: { fileSize: 5 * 1024 * 1024 }, // 5MB file size limit
 });
 
@@ -40,5 +40,11 @@ router.get("/",getAllProducts)
  * @access Public
  */
 router.get("/:id", getProductDetails) 
+
+/**
+ * 
+ */
+
+router.post("/:id/variants", AuthenticateSeller,upload.array("images", 7), createProductVariant);
 
 export default router;

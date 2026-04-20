@@ -1,196 +1,328 @@
-import React, { useEffect, useState } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
-import { useProduct } from "../hooks/useProduct";
+import React, { useEffect, useState, useMemo } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useProduct } from '../hooks/useProduct';
 
 const ProductDetail = () => {
     const { id } = useParams();
     const [product, setProduct] = useState(null);
     const [selectedImage, setSelectedImage] = useState(0);
-    const { handleGetProductDetails } = useProduct();
+    const [selectedAttributes, setSelectedAttributes] = useState({});
     const navigate = useNavigate();
+    const { handleGetProductDetails } = useProduct();
+
+    async function fetchProductDetails() {
+        try {
+            const data = await handleGetProductDetails(id);
+            // Handle both cases depending on how API is structured
+            setProduct(data);
+        } catch (error) {
+            console.error("Failed to fetch product details", error);
+        }
+    }
 
     useEffect(() => {
-        async function fetchProductDetails() {
-            try {
-                const data = await handleGetProductDetails(id);
-                setProduct(data?.product || data);
-            } catch (error) {
-                console.error(error);
-            }
-        }
         fetchProductDetails();
     }, [id]);
 
+    useEffect(() => {
+        if (product?.variants?.length > 0) {
+            setSelectedAttributes(product.variants[0].attributes || {});
+        }
+    }, [product]);
+
+    const activeVariant = useMemo(() => {
+        if (!product?.variants || product.variants.length === 0) return null;
+        return product.variants.find(v => {
+            if (!v.attributes) return false;
+            const vKeys = Object.keys(v.attributes);
+            const sKeys = Object.keys(selectedAttributes);
+            const isMatch = vKeys.every(k => v.attributes[k] === selectedAttributes[k]);
+            // If they don't have exactly the same keys, they shouldn't perfectly match, 
+            // but we might only care about matching what's available.
+            return vKeys.length === sKeys.length && isMatch;
+        });
+    }, [product, selectedAttributes]);
+
+    const availableAttributes = useMemo(() => {
+        if (!product?.variants) return {};
+        const attrs = {};
+        product.variants.forEach(variant => {
+            if (variant.attributes) {
+                Object.entries(variant.attributes).forEach(([key, value]) => {
+                    if (!attrs[key]) attrs[key] = new Set();
+                    attrs[key].add(value);
+                });
+            }
+        });
+        Object.keys(attrs).forEach(key => {
+            attrs[key] = Array.from(attrs[key]);
+        });
+        return attrs;
+    }, [product]);
+
+    useEffect(() => {
+        setSelectedImage(0);
+    }, [activeVariant]);
+
+    const handleAttributeChange = (attrName, value) => {
+        const newAttrs = { ...selectedAttributes, [attrName]: value };
+
+        // Find if an exact match exists for this combination
+        const exactMatch = product.variants.find(v => {
+            const vAttrs = v.attributes || {};
+            return Object.keys(newAttrs).every(k => newAttrs[k] === vAttrs[k]) &&
+                Object.keys(vAttrs).every(k => newAttrs[k] === vAttrs[k]);
+        });
+
+        if (exactMatch) {
+            setSelectedAttributes(exactMatch.attributes);
+        } else {
+            // Find any variant that has this newly selected attribute to fallback nicely
+            const fallbackVariant = product.variants.find(v => v.attributes && v.attributes[attrName] === value);
+            if (fallbackVariant) {
+                setSelectedAttributes(fallbackVariant.attributes);
+            } else {
+                setSelectedAttributes(newAttrs);
+            }
+        }
+    };
+
+
+
+
+
+    // Hooks FIRST (always run)
+    const displayImages = useMemo(() => {
+        const variantImgs = activeVariant?.images || [];
+        const productImgs = product?.images || [];
+
+        const allImages = [...variantImgs, ...productImgs].filter(
+            (img, index, self) =>
+                index === self.findIndex(i => i.url === img.url)
+        );
+
+        if (allImages.length > 0) return allImages;
+
+        return [{ url: '/snitch_editorial_warm.png' }];
+    }, [activeVariant, product]);
+
+    const displayPrice = activeVariant?.price?.amount
+        ? activeVariant.price
+        : product?.price;
+
+
+    // THEN conditional render
     if (!product) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-[#fbf9f6]">
-                <div className="animate-pulse text-xs tracking-[0.3em] text-gray-400 uppercase">
-                    Loading Product...
-                </div>
+            <div className="min-h-screen flex items-center justify-center">
+                <p>Retrieving piece...</p>
             </div>
         );
     }
-
-    const images =
-        product.images && product.images.length > 0
-            ? product.images
-            : [{ url: "/snitch_editorial_warm.png" }];
-
     return (
         <>
-            {/* Fonts */}
+            {/* Google Fonts */}
             <link
-                href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Inter:wght@300;400;500;600&display=swap"
+                href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap"
                 rel="stylesheet"
             />
 
-            <div className="bg-[#fbf9f6] min-h-screen pb-24 font-['Inter']">
-
-                {/* NAVBAR */}
-                <nav className="px-8 lg:px-20 pt-10 pb-6 flex justify-between border-b border-[#e4e2df]">
-                    <Link
-                        to="/"
-                        className="tracking-[0.4em] text-sm uppercase text-[#C9A96E] font-serif"
+            <div
+                className="min-h-screen selection:bg-[#C9A96E]/30 pb-24"
+                style={{ backgroundColor: '#fbf9f6', fontFamily: "'Inter', sans-serif" }}
+            >
+                {/* ── Navbar ── */}
+                <nav className="px-8 lg:px-16 xl:px-24 pt-10 pb-6 flex items-center justify-between border-b" style={{ borderColor: '#e4e2df' }}>
+                    <Link to="/"
+                        className="text-sm font-medium tracking-[0.35em] uppercase hover:opacity-80 transition-opacity"
+                        style={{ fontFamily: "'Cormorant Garamond', serif", color: '#C9A96E' }}
                     >
                         Snitch.
                     </Link>
-
                     <button
                         onClick={() => navigate(-1)}
-                        className="text-xs tracking-[0.2em] uppercase text-gray-500 hover:text-[#C9A96E]"
+                        className="text-[10px] uppercase tracking-[0.2em] font-medium transition-colors hover:text-[#C9A96E]"
+                        style={{ color: '#7A6E63' }}
                     >
-                        Back
+                        Return to Archive
                     </button>
                 </nav>
 
-                <div className="max-w-7xl mx-auto px-8 lg:px-20 pt-16">
+                <div className="max-w-7xl mx-auto px-8 lg:px-16 xl:px-24 pt-12 lg:pt-20">
+                    <div className="flex flex-col lg:flex-row gap-12 lg:gap-24 items-start">
 
-                    <div className="flex flex-col lg:flex-row gap-16">
+                        {/* ── LEFT: Image Gallery ── */}
+                        <div className="w-full lg:w-[70%] flex flex-col-reverse md:flex-row gap-4 lg:gap-6">
 
-                        {/* LEFT SIDE */}
-                        <div className="w-full lg:w-[65%] flex gap-6">
+                            {/* Thumbnails (Vertical on Desktop, Horizontal on Mobile) */}
+                            {displayImages.length > 1 && (
+                                <div className="flex flex-row md:flex-col gap-4 overflow-x-auto md:overflow-y-auto pb-2 md:pb-0 scrollbar-hide w-full md:w-20 lg:w-24 flex-shrink-0 md:max-h-[calc(100vh-200px)]">
+                                    {displayImages.map((img, idx) => (
+                                        <button
+                                            key={idx}
+                                            onClick={() => setSelectedImage(idx)}
+                                            className={`flex-shrink-0 w-20 md:w-full aspect-[4/5] overflow-hidden transition-all duration-300 ${selectedImage === idx ? 'opacity-100 ring-1 ring-[#C9A96E] ring-offset-2' : 'opacity-50 hover:opacity-100'}`}
+                                            style={{ backgroundColor: '#f5f3f0', '--tw-ring-offset-color': '#fbf9f6' }}
+                                        >
+                                            <img
 
-                            {/* THUMBNAILS */}
-                            {images.length > 1 && (
-                                <div className="flex lg:flex-col gap-4 overflow-auto">
-                                    {images.map((img, i) => (
-                                        <img
-                                            key={i}
-                                            src={img.url}
-                                            onClick={() => setSelectedImage(i)}
-                                            className={`w-20 h-24 object-cover cursor-pointer transition-all duration-300 
-                                            ${selectedImage === i
-                                                    ? "border border-black scale-105"
-                                                    : "opacity-50 hover:opacity-100"
-                                                }`}
-                                        />
+                                                src={img.url} alt={`View ${idx + 1}`} className="w-full h-full object-cover" />
+                                        </button>
                                     ))}
                                 </div>
                             )}
 
-                            {/* MAIN IMAGE */}
-                            <div className="relative w-full aspect-[4/5] bg-[#f5f3f0] overflow-hidden group">
-
+                            {/* Main Image */}
+                            <div className="relative w-full aspect-4/5 overflow-hidden group" style={{ backgroundColor: '#f5f3f0' }}>
                                 <img
-                                    src={images[selectedImage]?.url}
-                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                    src={displayImages[selectedImage]?.url || displayImages[0].url}
+                                    alt={product.title}
+                                    className="w-full h-full object-cover transition-opacity duration-500"
+
                                 />
-
-                                {/* IMAGE COUNTER */}
-                                <div className="absolute bottom-4 right-4 bg-white/70 px-3 py-1 text-xs tracking-wider backdrop-blur">
-                                    {selectedImage + 1} / {images.length}
-                                </div>
-
-                                {/* ARROWS */}
-                                {images.length > 1 && (
+                                {displayImages.length > 1 && (
                                     <>
                                         <button
-                                            onClick={() =>
-                                                setSelectedImage(prev =>
-                                                    prev === 0 ? images.length - 1 : prev - 1
-                                                )
-                                            }
-                                            className="absolute left-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 bg-white/70 p-2"
+                                            onClick={() => setSelectedImage(prev => prev === 0 ? displayImages.length - 1 : prev - 1)}
+                                            className="absolute left-4 lg:left-6 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 border"
+                                            style={{ backgroundColor: 'rgba(251,249,246,0.8)', borderColor: '#e4e2df', color: '#1b1c1a' }}
+                                            onMouseEnter={e => e.currentTarget.style.backgroundColor = '#fbf9f6'}
+                                            onMouseLeave={e => e.currentTarget.style.backgroundColor = 'rgba(251,249,246,0.8)'}
+                                            aria-label="Previous image"
                                         >
-                                            ‹
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.2" d="M15 19l-7-7 7-7" /></svg>
                                         </button>
-
                                         <button
-                                            onClick={() =>
-                                                setSelectedImage(prev =>
-                                                    prev === images.length - 1 ? 0 : prev + 1
-                                                )
-                                            }
-                                            className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 bg-white/70 p-2"
+                                            onClick={() => setSelectedImage(prev => prev === displayImages.length - 1 ? 0 : prev + 1)}
+                                            className="absolute right-4 lg:right-6 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 border"
+                                            style={{ backgroundColor: 'rgba(251,249,246,0.8)', borderColor: '#e4e2df', color: '#1b1c1a' }}
+                                            onMouseEnter={e => e.currentTarget.style.backgroundColor = '#fbf9f6'}
+                                            onMouseLeave={e => e.currentTarget.style.backgroundColor = 'rgba(251,249,246,0.8)'}
+                                            aria-label="Next image"
                                         >
-                                            ›
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.2" d="M9 5l7 7-7 7" /></svg>
                                         </button>
                                     </>
                                 )}
                             </div>
                         </div>
 
-                        {/* RIGHT SIDE */}
-                        <div className="w-full lg:w-[35%] lg:sticky lg:top-32 flex flex-col animate-[fadeIn_0.8s_ease-out]">
+                        {/* ── RIGHT: Product Details ── */}
+                        <div className="w-full lg:w-[30%] lg:sticky lg:top-24 flex flex-col pt-4">
 
-                            {/* TITLE */}
-                            <h1 className="text-5xl font-serif font-light tracking-tight leading-tight mb-4">
+                            <h1
+                                className="text-4xl md:text-5xl lg:text-6xl font-light leading-[1.05] mb-6"
+                                style={{ fontFamily: "'Cormorant Garamond', serif", color: '#1b1c1a' }}
+                            >
                                 {product.title}
                             </h1>
 
-                            {/* CATEGORY */}
-                            <div className="text-xs uppercase tracking-[0.3em] text-gray-400 mb-6">
-                                Premium Collection
+                            <div className="mb-8">
+                                <span
+                                    className="text-sm uppercase tracking-[0.2em] font-medium"
+                                    style={{ color: '#1b1c1a' }}
+                                >
+                                    {displayPrice?.currency} {displayPrice?.amount?.toLocaleString()}
+                                </span>
                             </div>
 
-                            {/* PRICE */}
-                            <div className="text-2xl font-medium mb-10">
-                                ₹ {product.price?.amount?.toLocaleString()}
-                            </div>
+                            <div className="h-px w-full mb-8" style={{ backgroundColor: '#e4e2df' }} />
 
-                            {/* DIVIDER */}
-                            <div className="w-12 h-[1px] bg-[#C9A96E] mb-8"></div>
+                            {/* Options/Variants */}
+                            {Object.entries(availableAttributes).map(([attrName, values]) => (
+                                <div key={attrName} className="mb-6">
+                                    <h3 className="text-[10px] uppercase tracking-[0.24em] font-medium mb-3" style={{ color: '#C9A96E' }}>
+                                        {attrName}
+                                    </h3>
+                                    <div className="flex flex-wrap gap-2">
+                                        {values.map(val => {
+                                            const isSelected = selectedAttributes[attrName] === val;
+                                            return (
+                                                <button
+                                                    key={val}
+                                                    onClick={() => handleAttributeChange(attrName, val)}
+                                                    className={`px-4 py-2 text-[11px] uppercase tracking-[0.15em] font-medium transition-all duration-300 border ${isSelected ? 'border-[#1b1c1a] bg-[#1b1c1a] text-[#fbf9f6]' : 'border-[#d0c5b5] text-[#1b1c1a] hover:border-[#1b1c1a]'}`}
+                                                    style={isSelected ? {} : { backgroundColor: 'transparent' }}
+                                                >
+                                                    {val}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            ))}
 
-                            {/* DESCRIPTION */}
-                            <p className="text-sm text-gray-600 leading-relaxed mb-12">
-                                {product.description}
-                            </p>
-
-                            {/* BUTTONS */}
-                            <div className="flex flex-col gap-4">
-
-                                {/* ADD TO CART */}
-                                <button className="relative overflow-hidden border border-black py-4 uppercase text-xs tracking-[0.3em] group active:scale-[0.98]">
-
-                                    <span className="relative z-10 group-hover:text-white transition">
-                                        Add to Cart
+                            {/* Stock Information */}
+                            {activeVariant && activeVariant.stock !== undefined && (
+                                <div className="mb-6">
+                                    <span className={`text-[10px] uppercase tracking-[0.2em] font-medium ${activeVariant.stock > 0 ? 'text-green-700' : 'text-red-700'}`}>
+                                        {activeVariant.stock > 0 ? `${activeVariant.stock} in stock` : 'Out of stock'}
                                     </span>
+                                </div>
+                            )}
 
-                                    <div className="absolute inset-0 bg-black translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                            <div className="mb-12">
+                                <h3 className="text-[10px] uppercase tracking-[0.24em] font-medium mb-4" style={{ color: '#C9A96E' }}>
+                                    The Details
+                                </h3>
+                                <p className="text-sm leading-relaxed" style={{ color: '#7A6E63' }}>
+                                    {product.description}
+                                </p>
+                            </div>
+
+                            {/* Actions */}
+                            <div className="flex flex-col gap-4 mt-auto">
+                                <button
+                                    className="w-full py-4 text-[11px] uppercase tracking-[0.25em] font-medium transition-all duration-300"
+                                    style={{
+                                        backgroundColor: '#1b1c1a',
+                                        color: '#fbf9f6',
+                                        fontFamily: "'Inter', sans-serif"
+                                    }}
+                                    onMouseEnter={e => {
+                                        e.currentTarget.style.backgroundColor = '#C9A96E';
+                                        e.currentTarget.style.color = '#1b1c1a';
+                                    }}
+                                    onMouseLeave={e => {
+                                        e.currentTarget.style.backgroundColor = '#1b1c1a';
+                                        e.currentTarget.style.color = '#fbf9f6';
+                                    }}
+                                >
+                                    Add to Cart
                                 </button>
 
-                                {/* BUY NOW */}
-                                <button className="border py-4 uppercase text-xs tracking-[0.3em] hover:border-[#C9A96E] active:scale-[0.98]">
+                                <button
+                                    className="w-full py-4 text-[11px] uppercase tracking-[0.25em] font-medium transition-all duration-300 border"
+                                    style={{
+                                        backgroundColor: 'transparent',
+                                        borderColor: '#d0c5b5',
+                                        color: '#1b1c1a',
+                                        fontFamily: "'Inter', sans-serif"
+                                    }}
+                                    onMouseEnter={e => {
+                                        e.currentTarget.style.borderColor = '#C9A96E';
+                                    }}
+                                    onMouseLeave={e => {
+                                        e.currentTarget.style.borderColor = '#d0c5b5';
+                                    }}
+                                >
                                     Buy Now
                                 </button>
                             </div>
 
-                            {/* EXTRA INFO */}
-                            <div className="mt-14 space-y-4 text-xs uppercase text-gray-400">
-
-                                <div className="flex justify-between border-b pb-3">
+                            {/* Extra elegant details */}
+                            <div className="mt-14 space-y-4 text-[10px] uppercase tracking-[0.1em]" style={{ color: '#B5ADA3' }}>
+                                <div className="flex justify-between border-b pb-3" style={{ borderColor: '#e4e2df' }}>
                                     <span>Shipping</span>
-                                    <span>Free over ₹15,000</span>
+                                    <span>Complimentary over INR 15,000</span>
                                 </div>
-
-                                <div className="flex justify-between border-b pb-3">
+                                <div className="flex justify-between border-b pb-3" style={{ borderColor: '#e4e2df' }}>
                                     <span>Returns</span>
-                                    <span>14 Days</span>
+                                    <span>Within 14 days of delivery</span>
                                 </div>
-
-                                <div className="flex justify-between border-b pb-3">
+                                <div className="flex justify-between border-b pb-3" style={{ borderColor: '#e4e2df' }}>
                                     <span>Authenticity</span>
-                                    <span>Guaranteed</span>
+                                    <span>100% Guaranteed</span>
                                 </div>
                             </div>
 
@@ -198,22 +330,6 @@ const ProductDetail = () => {
                     </div>
                 </div>
             </div>
-
-            {/* ANIMATION */}
-            <style>
-                {`
-                @keyframes fadeIn {
-                    from {
-                        opacity: 0;
-                        transform: translateY(10px);
-                    }
-                    to {
-                        opacity: 1;
-                        transform: translateY(0);
-                    }
-                }
-                `}
-            </style>
         </>
     );
 };
